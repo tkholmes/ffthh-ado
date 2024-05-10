@@ -16,7 +16,7 @@ variables:
 
 steps:
 - template: templates/include-npm-steps.yml
-  displayName: 'npm install and build'
+
 - task: AzureCLI@2
   displayName: Upload to Azure Storage Account
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
