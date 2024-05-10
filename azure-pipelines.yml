@@ -15,17 +15,8 @@ variables:
   storageAccount: ffthhstoragetholmes
 
 steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '16.x'
-  displayName: 'Install Node.js'
-
-- script: |
-    npm install
-    npm run build
-    CI=true npm run test
+- template: templates/include-npm-steps.yml
   displayName: 'npm install and build'
-  
 - task: AzureCLI@2
   displayName: Upload to Azure Storage Account
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
