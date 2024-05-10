@@ -9,6 +9,11 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
+variables:
+  subscriptionName: AzureServiceConnection
+  storageContainer: "$web"
+  storageAccount: ffthhstoragetholmes
+
 steps:
 - task: NodeTool@0
   inputs:
@@ -21,4 +26,19 @@ steps:
     CI=true npm run test
   displayName: 'npm install and build'
   
-
+- task: AzureCLI@2
+  displayName: Upload to Azure Storage Account
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  inputs:
+    azureSubscription: '$(subscriptionName)'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      echo "STEP: Setup"
+      az --version
+      az account show
+      az config set extension.use_dynamic_install=yes_without_prompt
+      echo "STEP: Removing blobs from storage"
+      az storage azcopy blob delete -c '$(storageContainer)' --account-name '$(storageAccount)' --recursive
+      echo "STEP: Uploading blobs to storage"
+      az storage azcopy blob upload -c '$(storageContainer)' --account-name '$(storageAccount)' -s "build/*" --recursive
